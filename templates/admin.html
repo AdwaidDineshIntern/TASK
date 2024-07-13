@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Admin Page</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h2 class="mt-5">Admin Page</h2>
+
+    <div class="row mt-5">
+      <div class="col-md-6">
+        <h3>Users</h3>
+        <ul class="list-group">
+          {% for user in users %}
+            <li class="list-group-item">{{ user['username'] }} ({{ user['role'] }})</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col-md-6">
+        <h3>Add New User</h3>
+        <form action="{{ url_for('add_user') }}" method="POST">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="admin">Admin</option>
+                <option value="normal user">Normal User</option>
+            </select><br><br>
+
+            <button type="submit" class="btn btn-primary">Add User</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-md-6">
+        <h3>Add New Task</h3>
+        <form action="{{ url_for('add_task') }}" method="POST" enctype="multipart/form-data">
+            <label for="task">Task:</label>
+            <input type="text" id="task" name="task" required><br><br>
+
+            <label for="file">Upload File:</label>
+            <input type="file" id="file" name="file"><br><br>
+
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <h3>All Tasks</h3>
+        <ul class="list-group">
+          {% for task in tasks %}
+            <li class="list-group-item">
+              {{ task['task'] }} (Status: {{ task['status'] }})
+              {% if task['file_path'] %}
+                <br><a href="{{ url_for('download_file', filename=task['file_path'].split('/')[-1]) }}">Download File</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <a href="{{ url_for('home') }}" class="btn btn-secondary mt-3">Back to Home</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger mt-3">Logout</a>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
+
