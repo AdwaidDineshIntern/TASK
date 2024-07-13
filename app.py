@@ -82,7 +82,7 @@ def add_task():
     conn.close()
 
     flash('Task added successfully!', 'success')
-    return redirect(url_for('home'))
+    return redirect(url_for('admin'))
 
 # Route to update a task (accessible by both admin and normal users)
 @app.route('/update_task/<int:task_id>', methods=['POST'])
@@ -102,6 +102,23 @@ def update_task(task_id):
 
     flash('Task updated successfully!', 'success')
     return redirect(url_for('home'))
+
+# Route to delete a task (only accessible by admin)
+@app.route('/delete_task/<int:task_id>', methods=['POST'])
+def delete_task(task_id):
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Access denied!', 'danger')
+        return redirect(url_for('home'))
+
+    # Delete task from the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM tasks WHERE id = ?', (task_id,))
+    conn.commit()
+    conn.close()
+
+    flash('Task deleted successfully!', 'success')
+    return redirect(url_for('admin'))
 
 # Route to serve uploaded files
 @app.route('/uploads/<filename>')
@@ -146,6 +163,44 @@ def add_user():
     conn.close()
 
     flash('User added successfully!', 'success')
+    return redirect(url_for('admin'))
+
+# Route to edit a user (accessible only by admin)
+@app.route('/edit_user/<int:user_id>', methods=['POST'])
+def edit_user(user_id):
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Access denied!', 'danger')
+        return redirect(url_for('admin'))
+
+    username = request.form['username']
+    password = request.form['password']
+    role = request.form['role']
+
+    # Update user in the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE users SET username = ?, password = ?, role = ? WHERE id = ?', (username, password, role, user_id))
+    conn.commit()
+    conn.close()
+
+    flash('User updated successfully!', 'success')
+    return redirect(url_for('admin'))
+
+# Route to delete a user (accessible only by admin)
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    if 'user_id' not in session or session['role'] != 'admin':
+        flash('Access denied!', 'danger')
+        return redirect(url_for('admin'))
+
+    # Delete user from the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM users WHERE id = ?', (user_id,))
+    conn.commit()
+    conn.close()
+
+    flash('User deleted successfully!', 'success')
     return redirect(url_for('admin'))
 
 # Helper function to check user credentials (replace with your own implementation)

@@ -15,7 +15,21 @@
         <h3>Users</h3>
         <ul class="list-group">
           {% for user in users %}
-            <li class="list-group-item">{{ user['username'] }} ({{ user['role'] }})</li>
+            <li class="list-group-item">
+              {{ user['username'] }} ({{ user['role'] }})
+              <form action="{{ url_for('edit_user', user_id=user['id']) }}" method="POST" class="form-inline mt-2">
+                <input type="text" name="username" value="{{ user['username'] }}" class="form-control mr-2" required>
+                <input type="password" name="password" placeholder="New Password" class="form-control mr-2">
+                <select name="role" class="form-control mr-2" required>
+                  <option value="admin" {% if user['role'] == 'admin' %}selected{% endif %}>Admin</option>
+                  <option value="normal user" {% if user['role'] == 'normal user' %}selected{% endif %}>Normal User</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm mr-2">Edit</button>
+              </form>
+              <form action="{{ url_for('delete_user', user_id=user['id']) }}" method="POST" class="mt-2">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
+            </li>
           {% endfor %}
         </ul>
       </div>
@@ -24,16 +38,16 @@
         <h3>Add New User</h3>
         <form action="{{ url_for('add_user') }}" method="POST">
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required><br><br>
+            <input type="text" id="username" name="username" required class="form-control"><br>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br><br>
+            <input type="password" id="password" name="password" required class="form-control"><br>
 
             <label for="role">Role:</label>
-            <select id="role" name="role" required>
+            <select id="role" name="role" required class="form-control">
                 <option value="admin">Admin</option>
                 <option value="normal user">Normal User</option>
-            </select><br><br>
+            </select><br>
 
             <button type="submit" class="btn btn-primary">Add User</button>
         </form>
@@ -45,10 +59,10 @@
         <h3>Add New Task</h3>
         <form action="{{ url_for('add_task') }}" method="POST" enctype="multipart/form-data">
             <label for="task">Task:</label>
-            <input type="text" id="task" name="task" required><br><br>
+            <input type="text" id="task" name="task" required class="form-control"><br>
 
             <label for="file">Upload File:</label>
-            <input type="file" id="file" name="file"><br><br>
+            <input type="file" id="file" name="file" class="form-control-file"><br>
 
             <button type="submit" class="btn btn-primary">Add Task</button>
         </form>
@@ -59,7 +73,18 @@
         <ul class="list-group">
           {% for task in tasks %}
             <li class="list-group-item">
-              {{ task['task'] }} (Status: {{ task['status'] }})
+              <form action="{{ url_for('update_task', task_id=task['id']) }}" method="POST" class="form-inline">
+                <input type="text" name="task" value="{{ task['task'] }}" class="form-control mr-2" required>
+                <select name="status" class="form-control mr-2" required>
+                  <option value="not started" {% if task['status'] == 'not started' %}selected{% endif %}>Not Started</option>
+                  <option value="in progress" {% if task['status'] == 'in progress' %}selected{% endif %}>In Progress</option>
+                  <option value="completed" {% if task['status'] == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm mr-2">Edit</button>
+              </form>
+              <form action="{{ url_for('delete_task', task_id=task['id']) }}" method="POST" class="mt-2">
+                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+              </form>
               {% if task['file_path'] %}
                 <br><a href="{{ url_for('download_file', filename=task['file_path'].split('/')[-1]) }}">Download File</a>
               {% endif %}
