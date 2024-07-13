@@ -2,32 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile</title>
+    <title>User Profile</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-5">
-        <h2>Profile</h2>
-        {% with messages = get_flashed_messages() %}
+    <div class="container">
+        <h2 class="mt-5">User Profile</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message[1] }}">{{ message[0] }}</div>
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <div class="card mt-3">
-            <div class="card-body">
-                <h5 class="card-title">Username: {{ user['username'] }}</h5>
-                <p class="card-text">Email: {{ user['email'] }}</p>
-                <p class="card-text">Role: {{ user['role'] }}</p>
+
+        <form action="{{ url_for('profile') }}" method="POST">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" class="form-control" id="username" name="username" value="{{ user['username'] }}" required>
             </div>
-        </div>
-        <p class="mt-5"><a href="{{ url_for('home') }}">Back to Home</a></p>
-        <p><a href="{{ url_for('logout') }}">Logout</a></p>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password" value="{{ user['password'] }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Profile</button>
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+        </form>
     </div>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
 

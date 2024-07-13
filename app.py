@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 import sqlite3
-import os
+import os  # Import os module here
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -54,14 +54,14 @@ def home():
     tasks = cursor.fetchall()
     conn.close()
 
-    return render_template('home.html', tasks=tasks, username=session['username'], role=session['role'])
+    return render_template('home.html', tasks=tasks, username=session['username'], role=session['role'], os=os)  # Pass os module to template context
 
-# Route to add a new task (only accessible by admin)
+# Route to add a new task (accessible by both admin and normal users)
 @app.route('/add_task', methods=['POST'])
 def add_task():
-    if 'user_id' not in session or session['role'] != 'admin':
-        flash('Access denied!', 'danger')
-        return redirect(url_for('home'))
+    if 'user_id' not in session:
+        flash('You need to log in first.', 'danger')
+        return redirect(url_for('login'))
 
     task = request.form['task']
 
@@ -82,14 +82,14 @@ def add_task():
     conn.close()
 
     flash('Task added successfully!', 'success')
-    return redirect(url_for('admin'))
+    return redirect(url_for('home'))
 
 # Route to update a task (accessible by both admin and normal users)
 @app.route('/update_task/<int:task_id>', methods=['POST'])
 def update_task(task_id):
     if 'user_id' not in session:
-        flash('Access denied!', 'danger')
-        return redirect(url_for('home'))
+        flash('You need to log in first.', 'danger')
+        return redirect(url_for('login'))
 
     new_status = request.form['status']
 
@@ -118,7 +118,7 @@ def delete_task(task_id):
     conn.close()
 
     flash('Task deleted successfully!', 'success')
-    return redirect(url_for('admin'))
+    return redirect(url_for('home'))
 
 # Route to serve uploaded files
 @app.route('/uploads/<filename>')
@@ -202,6 +202,33 @@ def delete_user(user_id):
 
     flash('User deleted successfully!', 'success')
     return redirect(url_for('admin'))
+
+# Route to display and update the user profile
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session:
+        flash('You need to log in first.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user_id = session['user_id']
+
+        cursor.execute('UPDATE users SET username = ?, password = ? WHERE id = ?', (username, password, user_id))
+        conn.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('home'))
+
+    user_id = session['user_id']
+    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+
+    return render_template('profile.html', user=user)
 
 # Helper function to check user credentials (replace with your own implementation)
 def check_user(username, password):

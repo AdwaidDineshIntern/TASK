@@ -19,35 +19,62 @@
         {% endif %}
     {% endwith %}
 
-    <h3>Welcome, {{ username }}!</h3>
+    <h4>Welcome, {{ username }}!</h4>
+    <p>Role: {{ role }}</p>
 
-    <h4>Your Tasks:</h4>
-    <ul class="list-group">
-      {% for task in tasks %}
-        <li class="list-group-item">
-          {{ task['task'] }} (Status: {{ task['status'] }})
-          <form action="{{ url_for('update_task', task_id=task['id']) }}" method="post" class="mt-2">
-            <select name="status">
-              <option value="not started">Not Started</option>
-              <option value="in progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
-            <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
-          </form>
-        </li>
-      {% endfor %}
-    </ul>
+    <table class="table mt-3">
+      <thead>
+        <tr>
+          <th>Task ID</th>
+          <th>Task</th>
+          <th>Status</th>
+          <th>File</th>
+          {% if role == 'admin' %}
+            <th>Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+          <tr>
+            <td>{{ task['id'] }}</td>
+            <td>{{ task['task'] }}</td>
+            <td>
+              <form action="{{ url_for('update_task', task_id=task['id']) }}" method="post">
+                <select name="status">
+                  <option value="not started" {% if task['status'] == 'not started' %} selected {% endif %}>Not Started</option>
+                  <option value="in progress" {% if task['status'] == 'in progress' %} selected {% endif %}>In Progress</option>
+                  <option value="completed" {% if task['status'] == 'completed' %} selected {% endif %}>Completed</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-primary">Update Status</button>
+              </form>
+            </td>
+            <td>
+              {% if task['file_path'] %}
+                <a href="{{ url_for('download_file', filename=os.path.basename(task['file_path'])) }}">Download File</a>
+              {% else %}
+                No file uploaded
+              {% endif %}
+            </td>
+            {% if role == 'admin' %}
+              <td>
+                <form action="{{ url_for('delete_task', task_id=task['id']) }}" method="post">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
-    <a href="{{ url_for('logout') }}" class="btn btn-danger mt-3">Logout</a>
-
+    <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    <a href="{{ url_for('profile') }}" class="btn btn-info">Profile</a>
     {% if role == 'admin' %}
-      <a href="{{ url_for('admin') }}" class="btn btn-secondary mt-3">Admin Page</a>
+        <a href="{{ url_for('admin') }}" class="btn btn-primary">Admin Panel</a>
     {% endif %}
-  </div>
 
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </div>
 </body>
 </html>
 
